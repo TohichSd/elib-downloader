@@ -18,6 +18,10 @@ def main():
     images = []
     page_num = 0
     page_res = session.get(BASE_PAGE_URL.format(id=book_id, page=page_num))
+    if 'have permission' in page_res.text or 'Invalid document' in page_res.text:
+        print('Похоже вы ввели некорректный ID :-(\n')
+        input('Нажмите Enter для закрытия...')
+        raise Exception()
     while 'phperror' not in page_res.text:
         with open('tmp/' + str(page_num + 1) + '.jpg', 'wb') as file:
             file.write(page_res.content)
@@ -27,11 +31,12 @@ def main():
         page_res = session.get(BASE_PAGE_URL.format(id=book_id, page=page_num))
     images[0].save('result.pdf', save_all=True, append_images=images[1:])
     shutil.rmtree('./tmp')
-    print('\nКнига сохранена в result.pdf')
+    print('Книга сохранена в result.pdf\n')
     input('Нажмите Enter для закрытия...')
 
 
 def login():
+    save_config = False
     session = Session()
     login_data = {'action': 'login',
                   'cookieverify': '',
@@ -50,13 +55,19 @@ def login():
             password = input('Введите пароль: ')
             login_data['username'] = username
             login_data['password'] = password
-            json_config = dumps({'username': username, 'password': password})
-            config_file.write(json_config)
+            save_config = True
 
+        print('Логинюсь в библиотеку...')
         login_res = session.post(LOGIN_URL, data=login_data)
         if login_res.url.startswith(LOGIN_URL):
             open('config.json', 'w').close()
-            raise Exception('Не удалось войти в электронную библиотеку')
+            print('Не удалось войти в электронную библиотеку')
+            input('\nНажмите Enter для закрытия...')
+            raise Exception()
+        if save_config:
+            json_config = dumps({'username': login_data['username'], 'password': login_data['password']})
+            config_file.write(json_config)
+        print('Готово!\n')
         return session
 
 
