@@ -11,7 +11,7 @@ BASE_PAGE_URL = 'http://elib.mpei.ru/plugins/SecView/getDoc.php?id={id}&page={pa
 
 
 def main():
-    print('elib downloader by TohichSd\n')
+    print('elib downloader by TohichSd\nhttps://github.com/TohichSd/elib-downloader\n')
     session = login()
     book_id = input('Введите ID книги: ')
     Path('./tmp').mkdir(exist_ok=True)
